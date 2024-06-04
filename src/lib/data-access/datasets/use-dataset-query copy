@@ -1,0 +1,67 @@
+import { useQuery } from '@tanstack/react-query';
+import domo from 'ryuu.js';
+import { useEffect } from 'react';
+import { DatasetsFromDomo } from './datasets-schema';
+// import { datasetData } from '../data';
+// import { Datasets, DatasetsSchema,DatasetsFromDomo } from './datasets-schema';
+
+const queryFn: () => Promise<DatasetsFromDomo> = async () => {
+  // let response: DatasetsFromDomo;
+  // if (import.meta.env.DEV) {
+  //   response = datasetData;
+  // } else {
+  const response = await domo.get<DatasetsFromDomo>('data/v1/Datasets');
+  console.log(response);
+  return response;
+  // }
+};
+
+//   queryFn = (): Promise<Datasets> => {
+//     return domo.get<DatasetsFromDomo>('data/v1/Datasets').then((data) => {
+//       const datasetMap = new Map();
+//       data.forEach((dataset) => {
+//         const id = dataset.DatasetID;
+//         const datasetObj = datasetMap.get(id);
+//         if (!datasetObj) {
+//           datasetMap.set(id, {
+//             DatasetID: id,
+//             Name: dataset.Name,
+//             RowCount: dataset.RowCount,
+//             ColumnArray: [dataset.ColumnName],
+//           });
+// 				} else {
+// 					datasetObj.ColumnArray.push(dataset.ColumnName)
+// 				}
+//       });
+
+//       return DatasetsSchema.parse(dataWithColumnArray);
+//     });
+//   };
+// }
+
+export function useDatasetsQuery() {
+  const { data, error, isLoading, isSuccess, isError, refetch } = useQuery({
+    queryKey: ['Datasetss'],
+    queryFn,
+    staleTime: Infinity,
+  });
+
+  useEffect(() => {
+    domo.onDataUpdate((alias) => {
+      if (alias === 'Datasets') {
+        console.log('refetching ' + alias);
+        refetch();
+      }
+    });
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  // const dataWithColumnArray = data?.map((row) => {
+  //   const ColumnArray = row.Columns.split(', ');
+  //   return {
+  //     ...row,
+  //     ColumnArray,
+  //   };
+  // });
+
+  return { error, isLoading, isError, isSuccess, data };
+}

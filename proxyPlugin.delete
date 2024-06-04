@@ -1,0 +1,25 @@
+import { ViteDevServer } from 'vite';
+import { Proxy } from '@domoinc/ryuu-proxy';
+import manifest from './public/manifest.json';
+import { ProxyOptions } from '@domoinc/ryuu-proxy/dist/lib/models';
+
+const config: ProxyOptions = {
+  manifest,
+};
+const proxy = new Proxy(config);
+
+const proxyDomo = () => {
+  return {
+    name: 'proxy-domo',
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use((req, res, next) => {
+        proxy
+          .stream(req)
+          .then((stream) => stream.pipe(res))
+          .catch(() => next());
+      });
+    },
+  };
+};
+
+export default proxyDomo;

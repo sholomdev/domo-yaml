@@ -1,0 +1,135 @@
+{
+  "name": "yaml-testing",
+  "version": "1.0.0",
+  "fullpage": true,
+  "sizing": {
+    "width": 6,
+    "height": 6
+  },
+  "mapping": [
+    {
+      "alias": "Datasets",
+      "dataSetId": "f664495b-1b3b-48ae-a599-a67af4c5cb9b",
+      "fields": [
+        {
+          "alias": "DatasetID",
+          "columnName": "Dataset ID"
+        },
+        {
+          "alias": "Name",
+          "columnName": "Name"
+        },
+        {
+          "alias": "RowCount",
+          "columnName": "Row Count"
+        },
+        {
+          "alias": "ColumnName",
+          "columnName": "Column Name"
+        }
+      ]
+    },
+
+    {
+      "alias": "yaml",
+      "dataSetId": "e46ef616-47ed-4db8-9b7c-8dd196afde7e",
+      "fields": [
+        {
+          "alias": "DatasetID",
+          "columnName": "DatasetID"
+        },
+        {
+          "alias": "DatasetName",
+          "columnName": "DatasetName"
+        },
+        {
+          "alias": "ColumnName",
+          "columnName": "ColumnName"
+        },
+        {
+          "alias": "TestName",
+          "columnName": "TestName"
+        }
+      ]
+    },
+
+    {
+      "alias": "TestResults",
+      "dataSetId": "1c0c5cd0-a52d-4860-8560-dc74f59716b8",
+      "fields": [
+        {
+          "alias": "DatasetID",
+          "columnName": "DatasetID"
+        },
+        {
+          "alias": "DatasetName",
+          "columnName": "DatasetName"
+        },
+        {
+          "alias": "ColumnName",
+          "columnName": "ColumnName"
+        },
+        {
+          "alias": "TestName",
+          "columnName": "TestName"
+        },
+        {
+          "alias": "Result",
+          "columnName": "Result"
+        },
+        {
+          "alias": "RowCount",
+          "columnName": "Row Count"
+        },
+        {
+          "alias": "Date",
+          "columnName": "Date"
+        },
+        {
+          "alias": "Error",
+          "columnName": "Error"
+        }
+      ]
+    }
+  ],
+  "packageMapping": [
+    {
+      "alias": "uploadDataset",
+      "parameters": [
+        {
+          "alias": "dataset",
+          "type": "dataset",
+          "nullable": false,
+          "isList": false,
+          "children": null
+        },
+        {
+          "alias": "values",
+          "type": "text",
+          "nullable": false,
+          "isList": false,
+          "children": null
+        }
+      ],
+      "output": {
+        "alias": "response",
+        "type": "object",
+        "isList": false,
+        "children": null
+      }
+    },
+    {
+      "alias": "runTests",
+      "parameters": [],
+      "output": {
+        "alias": "response",
+        "type": "text",
+        "isList": true,
+        "children": null
+      }
+    }
+  ],
+  "fileName": "manifest.json",
+  "id": "89cde4d1-9b2c-4125-b880-728733678709",
+  "proxyId": "5c906a0a-92a6-45ee-b420-54681eaa0895"
+}

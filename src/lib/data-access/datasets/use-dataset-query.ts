@@ -1,0 +1,50 @@
+import { useQuery } from '@tanstack/react-query';
+import domo from 'ryuu.js';
+import { useEffect } from 'react';
+import { domoDatasetData } from '../data';
+import { Datasets, DatasetsFromDomo, DatatsetSchema } from './datasets-schema';
+
+const queryFn: () => Promise<Datasets> = async () => {
+  let response: DatasetsFromDomo;
+  if (import.meta.env.DEV) {
+    response = domoDatasetData;
+  } else {
+    response = await domo.get<DatasetsFromDomo>('data/v1/Datasets');
+  }
+  const datasetMap: Datasets = new Map();
+  response.forEach((dataset) => {
+    const id = dataset.DatasetID;
+    const datasetObj = datasetMap.get(id);
+    if (!datasetObj) {
+      datasetMap.set(id, {
+        DatasetID: id,
+        Name: dataset.Name,
+        RowCount: dataset.RowCount,
+        ColumnArray: [dataset.ColumnName],
+      });
+    } else {
+      datasetObj.ColumnArray.push(dataset.ColumnName);
+    }
+  });
+  return DatatsetSchema.parse(datasetMap);
+};
+
+export function useDatasetsQuery() {
+  const { data, error, isLoading, isSuccess, isError, refetch } = useQuery({
+    queryKey: ['Datasets'],
+    queryFn,
+    staleTime: Infinity,
+  });
+
+  useEffect(() => {
+    domo.onDataUpdate((alias) => {
+      if (alias === 'Datasets') {
+        console.log('refetching ' + alias);
+        refetch();
+      }
+    });
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { error, isLoading, isError, isSuccess, data };
+}
