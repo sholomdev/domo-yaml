@@ -9,7 +9,9 @@ const queryFn: () => Promise<Datasets> = async () => {
   if (import.meta.env.DEV) {
     response = domoDatasetData;
   } else {
-    response = await domo.get<DatasetsFromDomo>('data/v1/Datasets');
+    response = await domo.get<DatasetsFromDomo>(
+      'data/v1/Datasets?filter=DatasetID in ["",""] '
+    );
   }
   const datasetMap: Datasets = new Map();
   response.forEach((dataset) => {

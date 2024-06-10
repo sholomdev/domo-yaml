@@ -7,7 +7,7 @@ export const TestResultSchema = z.object({
   TestName: z.enum(['unique', 'not_null', 'none']),
   RowCount: z.number(),
   Result: z.string(),
-  Date: z.number(),
+  Date: z.string(),
   Error: z.string(),
 });
 

@@ -1,5 +1,6 @@
 import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
 import * as yamlMode from '@codemirror/legacy-modes/mode/yaml';
+import { indentationMarkers } from '@replit/codemirror-indentation-markers';
 import { StreamLanguage } from '@codemirror/language';
 import { vscodeDarkInit } from '@uiw/codemirror-theme-vscode';
 import YamlControls from './YamlControls';
@@ -10,8 +11,7 @@ import { Alert } from './ui/alert';
 import { LoaderCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import useSaveYamlMutation from '@/lib/data-access/yaml/use-yaml-mutation';
-import validateYaml from '@/lib/data-access/yaml/validate-yaml';
-import { useDatasetsQuery } from '@/lib/data-access/datasets/use-dataset-query';
+import parseYAML from '@/lib/data-access/yaml/validate-yaml';
 import { downloadText } from '@/lib/download-text';
 import useRunTestsMutation from '@/lib/data-access/testResults/use-run-tests-mutation';
 import { toast } from 'sonner';
@@ -29,22 +29,30 @@ type Props = {
 
 export const YAMLEditor = function ({ code, setCode }: Props) {
   const yamlQuery = useYamlQuery();
-  const datasetQuery = useDatasetsQuery();
+  // const datasetQuery = useDatasetsQuery();
   const saveYaml = useSaveYamlMutation();
   const runTests = useRunTestsMutation();
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    if (saveYaml.isError) {
-      console.log('save yaml error: ', saveYaml);
-      setErrorMessage(saveYaml.error.message);
-    }
+    if (yamlQuery.isError) setErrorMessage(yamlQuery.error.message);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yamlQuery.isError]);
+
+  useEffect(() => {
+    console.log('save yaml status: ', saveYaml.status);
+
+    if (saveYaml.isError) setErrorMessage(saveYaml.error.message);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saveYaml.isError]);
 
-  const onChange = useCallback((val: string, _: ViewUpdate) => {
-    setCode(val);
-  }, []);
+  const onChange = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (val: string, _: ViewUpdate) => {
+      setCode(val);
+    },
+    [setCode]
+  );
 
   const onReset = () => {
     setErrorMessage('');
@@ -56,14 +64,12 @@ export const YAMLEditor = function ({ code, setCode }: Props) {
   };
 
   const onSave = () => {
-    if (datasetQuery.data) {
-      const validation = validateYaml(code, datasetQuery.data);
-      if (validation.success) {
-        setErrorMessage('');
-        saveYaml.mutate(validation.data);
-      } else {
-        setErrorMessage(validation.message);
-      }
+    const parsed = parseYAML(code);
+    if (parsed.success) {
+      setErrorMessage('');
+      saveYaml.mutate(parsed.data);
+    } else {
+      setErrorMessage(parsed.message);
     }
   };
 
@@ -74,11 +80,10 @@ export const YAMLEditor = function ({ code, setCode }: Props) {
   };
 
   if (yamlQuery.isError) {
-    console.log(yamlQuery.error);
     return (
       <AlertDestructive>
         <p>
-          Error. Could not retrieve YAML from dataset.{' '}
+          Error. Could not retrieve YAML from dataset. {yamlQuery.error.message}
           <Button
             className="h-8"
             variant="outline"
@@ -122,7 +127,7 @@ export const YAMLEditor = function ({ code, setCode }: Props) {
         value={code}
         onChange={onChange}
         theme={vsCodeDark}
-        extensions={[yaml]}
+        extensions={[yaml, indentationMarkers()]}
       />
     </div>
   );

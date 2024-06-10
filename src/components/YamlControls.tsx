@@ -42,7 +42,11 @@ const YamlControls = ({
         onClick={onSave}
         disabled={yamlUnchanged || isSaving}
       >
-        <Save className="mr-2 h-4 w-4" />
+        {isSaving ? (
+          <LucideRotateCw className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Save className="mr-2 h-4 w-4" />
+        )}
         Save Changes
       </Button>
 
