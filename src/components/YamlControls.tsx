@@ -1,6 +1,4 @@
-import { cn } from '@/lib/utils';
-import { Button } from './ui/button';
-import { FileDown, LucideRotateCw, Play, Save, Undo2 } from 'lucide-react';
+import { Button } from 'primereact/button';
 type Props = {
   yamlUnchanged: boolean;
   onReset: () => void;
@@ -23,83 +21,57 @@ const YamlControls = ({
   isSaving,
 }: Props) => {
   return (
-    <div className="flex flex-1 items-center mt-6 space-x-2 mb-2 px-3">
-      <Button
-        variant="outline"
-        className="h-8 px-2 lg:px-3"
+    <div className="card flex flex-wrap justify-content-center gap-2">
+      <Button 
+       severity="secondary"
+        icon="pi pi-undo"
+        size="small"
+        outlined 
         onClick={() => {
           onReset();
           setErrorMessage('');
         }}
         disabled={yamlUnchanged}
       >
-        <Undo2 className="mr-2 h-4 w-4" />
         Reset
       </Button>
       <Button
-        variant="outline"
-        className="h-8 px-2 lg:px-3"
+       severity="secondary"
+       icon={isSaving? 'pi pi-spin pi-spinner' : "pi pi-save"}
+      size="small"
+      outlined
         onClick={onSave}
         disabled={yamlUnchanged || isSaving}
-      >
-        {isSaving ? (
-          <LucideRotateCw className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <Save className="mr-2 h-4 w-4" />
-        )}
+      >       
         Save Changes
       </Button>
 
       <Button
-        className="h-8 px-2 lg:px-3"
-        variant="outline"
+       severity="secondary"
+      size="small"
+        outlined
+        icon="pi pi-download"
         onClick={onDownload}
       >
-        <FileDown className="mr-2 h-4 w-4" />
         Download
       </Button>
       <Button
-        className={cn('h-8 px-2 lg:px-3', isRunning && 'cursor-wait')}
-        variant="outline"
+       severity="secondary"
+      size="small"
+        // className={cn('h-8 px-2 lg:px-3', isRunning && 'cursor-wait')}
+        icon={isRunning? 'pi pi-spin pi-spinner' : "pi pi-play-circle" }
+        outlined
         onClick={onRunTests}
         disabled={isSaving}
       >
-        {isRunning ? (
-          <LucideRotateCw className="mr-2 h-4 w-4 animate-spin" />
+        {/* {isRunning ? (
+          <LucideRotateCw />
         ) : (
-          <Play className="mr-2 h-4 w-4" />
-        )}
+          <pi-play-circle  />
+        )} */}
         Run Tests
       </Button>
-      {/*
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger
-            className={cn(code !== originalCode && ' cursor-not-allowed')}
-          >
-            <a
-              className={cn(
-                buttonVariants({ variant: 'outline' }),
-                'h-8 px-2 lg:px-3 ml-auto',
-                (code !== originalCode || isLoading) &&
-                  'pointer-events-none opacity-50'
-              )}
-              onClick={handleRunTests}
-              //disabled={code !== originalCode}
-            >
-              Run Tests
-              {isLoading ? (
-                <LucideRotateCw className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Play className="ml-2 h-4 w-4" />
-              )}
-            </a>
-          </TooltipTrigger>
-          <TooltipContent className={cn(code === originalCode && 'hidden')}>
-            <p>Save changes first!</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider> */}
+     
     </div>
   );
 };

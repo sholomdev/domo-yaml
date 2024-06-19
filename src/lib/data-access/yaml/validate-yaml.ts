@@ -16,40 +16,38 @@ type ValidateState = ValidateFailedState | ValidateSuccessState;
 export const parsedYAMLtoCSV = (yml: YamlModel) => {
   const lines: string[] = [];
 
-  yml.folders.forEach((folder) => {
+  yml.marts.forEach((mart) => {
     const {
-      name: folderName,
+      name: martName,
       datasets,
-      description: folderDescription,
-    } = folder;
-    // const folderDescription = folder.description ?? 'none';
+    } = mart;
+    const martDescription = mart.description ?? 'none';
 
     datasets.forEach((dataset) => {
       const {
         name: datasetName,
         id,
         columns,
-        description: datasetDescription,
       } = dataset;
-      // const datasetDescription = dataset.description ?? 'none';
+      const datasetDescription = dataset.description ?? 'none';
 
       columns.forEach((column) => {
         const {
           name: columnName,
-          description: columnDescription,
           tests,
         } = column;
+        const columnDescription = column.description ?? 'none';
 
         if (!tests) {
           lines.push(
-            `${folderName},${folderDescription},${id},${datasetName},${datasetDescription},${columnName},${columnDescription},none,none`
+            `${martName},${martDescription},${id},${datasetName},${datasetDescription},${columnName},${columnDescription},none,none`
           );
         } else {
           tests.forEach((test) => {
             const { name: testName } = test;
-            // const testData = test.data ?? 'none';
+            const parameter = test.parameter ?? 'none';
             lines.push(
-              `${folderName},${folderDescription},${id},${datasetName},${datasetDescription},${columnName},${columnDescription},${testName},${test.data}`
+              `${martName},${martDescription},${id},${datasetName},${datasetDescription},${columnName},${columnDescription},${testName},${parameter}`
             );
           });
         }
@@ -75,8 +73,8 @@ const parseYAML = (yaml: string): ValidateState => {
     return { success: false, message: parsedYamlModel.error.message };
 
   const datasets = new Map<string, string[]>();
-  parsedYamlModel.data.folders.forEach((folder) => {
-    folder.datasets.forEach((dataset) => {
+  parsedYamlModel.data.marts.forEach((mart) => {
+    mart.datasets.forEach((dataset) => {
       const datasetColumns = dataset.columns.map((column) => column.name);
       datasets.set(dataset.id, datasetColumns);
     });

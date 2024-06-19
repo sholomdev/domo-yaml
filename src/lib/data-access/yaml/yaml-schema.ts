@@ -1,43 +1,42 @@
 import { z } from 'zod';
 
 export const yamlObjectSchema = z.object({
-  FolderName: z.string(),
-  FolderDescription: z.string(),
+  MartName: z.string(),
+  MartDescription: z.string(),
   DatasetID: z.string(),
   DatasetName: z.string(),
   DatasetDescription: z.string(),
   ColumnName: z.string(),
   ColumnDescription: z.string(),
-  TestName: z.enum(['unique', 'not_null', 'freshness', 'none', 'deviation']),
-  TestData: z.string(),
+  TestName: z.enum(['unique', 'not_null', 'freshness', 'row_count_deviation']),
+  TestParameter: z.string(),
 });
 
 export const yamlModelSchema = z.object({
-  folders: z.array(
+  marts: z.array(
     z.object({
       name: z.string(),
-      description: z.string(),
+      description: z.string().optional(),
       datasets: z.array(
         z.object({
           name: z.string(),
-          description: z.string(),
+          description: z.string().optional(),
           id: z.string(),
           columns: z.array(
             z.object({
               name: z.string(),
-              description: z.string(),
+              description: z.string().optional(),
               tests: z
                 .array(
                   z.object({
                     name: z.enum([
                       'unique',
                       'not_null',
-                      'freshness',
-                      'deviation',
-                      'none',
+                      'row_count_deviation',
+                      'freshness'
                     ]),
-                    data: z.string(),
-                  })
+                    parameter: z.string().optional()
+                  }),
                 )
                 .refine((items) => new Set(items).size === items.length, {
                   message: 'No duplicate tests please.',

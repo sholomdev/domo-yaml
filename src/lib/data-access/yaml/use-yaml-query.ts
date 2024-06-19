@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import domo from 'ryuu.js';
 import { yamlObjectArraySchema, YamlObjectArray } from './yaml-schema';
 import { yamlDatasetData } from '../data';
-import { objectsToYaml } from './objects-to-yaml';
+import { objectArrayToObjectModel, objectModelToYamlString } from './objects-to-yaml';
 
 const queryFn: () => Promise<YamlObjectArray> = async () => {
   let response: YamlObjectArray;
@@ -19,7 +19,10 @@ export function useYamlQuery() {
     queryKey: ['yaml'],
     queryFn,
     staleTime: Infinity,
-    select: (data) => objectsToYaml(data),
+    select: (data) =>{
+      const model = objectArrayToObjectModel(data);
+      return {model, yaml: objectModelToYamlString(model)}
+      },
   });
 
   // useEffect(() => {

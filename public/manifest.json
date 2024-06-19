@@ -12,12 +12,12 @@
       "dataSetId": "e46ef616-47ed-4db8-9b7c-8dd196afde7e",
       "fields": [
         {
-          "alias": "FolderName",
-          "columnName": "FolderName"
+          "alias": "MartName",
+          "columnName": "MartName"
         },
         {
-          "alias": "FolderDescription",
-          "columnName": "FolderDescription"
+          "alias": "MartDescription",
+          "columnName": "MartDescription"
         },
         {
           "alias": "DatasetID",
@@ -44,8 +44,8 @@
           "columnName": "TestName"
         },
         {
-          "alias": "TestData",
-          "columnName": "TestData"
+          "alias": "TestParameter",
+          "columnName": "TestParameter"
         }
       ]
     }

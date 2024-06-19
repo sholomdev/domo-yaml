@@ -1,20 +1,18 @@
-import CodeMirror, { ViewUpdate } from '@uiw/react-codemirror';
+import CodeMirror, {  Decoration, DecorationSet, EditorView, RangeSet, ReactCodeMirrorRef, StateEffect, StateField, ViewUpdate } from '@uiw/react-codemirror';
 import * as yamlMode from '@codemirror/legacy-modes/mode/yaml';
 import { indentationMarkers } from '@replit/codemirror-indentation-markers';
 import { StreamLanguage } from '@codemirror/language';
 import { vscodeDarkInit } from '@uiw/codemirror-theme-vscode';
 import YamlControls from './YamlControls';
 import { useYamlQuery } from '@/lib/data-access/yaml/use-yaml-query';
-import { useCallback, useEffect, useState } from 'react';
-import { AlertDestructive } from './ui/alertDestructive';
-import { Alert } from './ui/alert';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
-import { Button } from './ui/button';
 import useSaveYamlMutation from '@/lib/data-access/yaml/use-yaml-mutation';
 import parseYAML from '@/lib/data-access/yaml/validate-yaml';
 import { downloadText } from '@/lib/download-text';
 import useRunTestsMutation from '@/lib/data-access/testResults/use-run-tests-mutation';
-import { toast } from 'sonner';
+import { Toast } from 'primereact/toast';
+import { Message } from 'primereact/message';
 
 const yaml = StreamLanguage.define(yamlMode.yaml);
 
@@ -22,17 +20,50 @@ const vsCodeDark = vscodeDarkInit({
   settings: { fontFamily: 'Monaco, Courier, monospace' },
 });
 
+
+const updateHighlightedStateEffect = StateEffect.define<{from: number, to: number}>({
+  map: ({from, to}, change) => ({from: change.mapPos(from), to: change.mapPos(to)})
+});
+
+const highlightedStateField = StateField.define<DecorationSet>({
+  create() {
+    return Decoration.none;
+  },
+  update(currentValue, transaction) { 
+    currentValue = currentValue.map(transaction.changes);
+    for (const e of transaction.effects) {
+      if (e.is(updateHighlightedStateEffect)) {
+        const {from, to} = e.value;
+        if(to > from) currentValue = RangeSet.of(highlightMark.range(from, to));
+      }
+    }
+    return currentValue;
+  },
+  provide: f => EditorView.decorations.from(f)
+});
+
+const highlightMark = Decoration.mark({class: "cm-highlight"})
+const highlightTheme = EditorView.baseTheme({
+  ".cm-highlight": { backgroundColor: "#da4900", color: 'white', fontWeight: 'bold' }
+})
+
+
+
 type Props = {
   code: string;
   setCode: (code: string) => void;
-};
+  highlighted: {from: number, to: number};
+  };
 
-export const YAMLEditor = function ({ code, setCode }: Props) {
+export const YAMLEditor = function ({ code, setCode, highlighted,  }: Props) {
+  const toast = useRef<Toast>(null);
   const yamlQuery = useYamlQuery();
   // const datasetQuery = useDatasetsQuery();
   const saveYaml = useSaveYamlMutation();
   const runTests = useRunTestsMutation();
   const [errorMessage, setErrorMessage] = useState('');
+  
+  const codeEditorRef = useRef<ReactCodeMirrorRef | null>(null);
 
   useEffect(() => {
     if (yamlQuery.isError) setErrorMessage(yamlQuery.error.message);
@@ -56,7 +87,7 @@ export const YAMLEditor = function ({ code, setCode }: Props) {
 
   const onReset = () => {
     setErrorMessage('');
-    setCode(yamlQuery.data!);
+    setCode(yamlQuery.data?.yaml!);
   };
 
   const onDownload = () => {
@@ -75,48 +106,50 @@ export const YAMLEditor = function ({ code, setCode }: Props) {
 
   const onRunTests = () => {
     setErrorMessage('');
-    toast.info('Tests running...');
+    toast.current?.show({ severity: 'info', summary: 'Info', detail: 'Running tests...' });
     runTests.mutate();
   };
 
   if (yamlQuery.isError) {
     return (
-      <AlertDestructive>
-        <p>
-          Error. Could not retrieve YAML from dataset. {yamlQuery.error.message}
-          <Button
-            className="h-8"
-            variant="outline"
-            onClick={() => {
-              yamlQuery.refetch();
-            }}
-          >
-            Retry
-          </Button>
-        </p>
-      </AlertDestructive>
+        <Message severity="error" text={`Error. Could not retrieve YAML from dataset. ${yamlQuery.error.message}`}>
+          
+      </Message>
     );
   }
 
+  useEffect(() => {
+    if (codeEditorRef.current?.view) {
+      codeEditorRef.current.view.dispatch({
+        effects: [updateHighlightedStateEffect.of(highlighted)],
+        sequential: true,
+        scrollIntoView: true
+      });
+    }
+  }, [highlighted]);
+
+
+
   if (yamlQuery.isLoading)
     return (
-      <Alert>
+      <div>
         <LoaderCircle className="w-4 h-4 animate-spin m-1"></LoaderCircle>{' '}
         <p>Loading YAML from dataset...</p>
-      </Alert>
+      </div>
     );
   return (
-    <div>
+    <>
+      <Toast ref={toast} />
       {errorMessage !== '' && (
-        <AlertDestructive>{errorMessage}</AlertDestructive>
+        <Message severity="error" text={errorMessage} />
       )}
       <div className="flex">
         <YamlControls
           onReset={onReset}
           onSave={onSave}
-          yamlUnchanged={code === yamlQuery.data}
+          yamlUnchanged={code === yamlQuery?.data?.yaml}
           setErrorMessage={setErrorMessage}
-          onDownload={onDownload}
+          onDownload={(onDownload)}
           onRunTests={onRunTests}
           isSaving={saveYaml.isPending}
           isRunning={runTests.isPending}
@@ -124,11 +157,12 @@ export const YAMLEditor = function ({ code, setCode }: Props) {
       </div>
       <CodeMirror
         className="h-full overflow-y-hidden"
+        ref={codeEditorRef}
         value={code}
         onChange={onChange}
         theme={vsCodeDark}
-        extensions={[yaml, indentationMarkers()]}
+        extensions={[yaml, indentationMarkers(), highlightTheme,highlightedStateField]}
       />
-    </div>
+    </>
   );
 };

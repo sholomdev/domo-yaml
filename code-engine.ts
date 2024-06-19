@@ -1,4 +1,24 @@
-const codeengine = require('codeengine');
+// const codeengine = require('codeengine');
+
+const codeengine =  {
+  sendRequest: async (method: string, url: string, body: any)=>{
+    return {columns: ['a','b','c'], rows: [['1','2','3'],['4','5','6']]};
+  }
+}
+
+interface SuccessResponse <T>{
+  success: true;
+  data: T;
+}
+
+type ErrorResponse = {
+  success: false;
+  message: string;
+}
+
+type DomoResponse<T> = ErrorResponse | SuccessResponse<T>;
+
+type QueryResponseList = {rows: string[][], columns: string[]};
 
 const QUERY_URL = 'api/query/v1/execute/:id';
 const YAML_TESTS_ID = 'e46ef616-47ed-4db8-9b7c-8dd196afde7e';
@@ -12,13 +32,13 @@ const TEST_RESULTS_ID = '1c0c5cd0-a52d-4860-8560-dc74f59716b8';
  * @returns {success: boolean, data | message}
  */
 
-async function queryWithSql(dataset, sql) {
-  const convertResponseToList = ({ rows, columns }) => {
+async function queryWithSql(dataset: string, sql: string): Promise<DomoResponse<Record<string,string >[]>> {
+  const convertResponseToList = ({ rows, columns } : QueryResponseList) => {
     return rows.map((row) => {
       return row.reduce((acc, curr, index) => {
         acc[columns[index]] = curr;
         return acc;
-      }, {});
+      }, {} as Record<string,string >);
     });
   };
 
@@ -39,7 +59,7 @@ async function queryWithSql(dataset, sql) {
  * @returns {success: boolean, data | message}
  */
 
-async function getDatasetColumns(dataset) {
+async function getDatasetColumns(dataset): Promise<DomoResponse<string[]>> {
   const sql = 'SELECT * FROM dataset LIMIT 1';
   const res = await queryWithSql(dataset, sql);
   if (!res.success)

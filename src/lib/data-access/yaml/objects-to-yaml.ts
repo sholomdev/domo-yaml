@@ -3,23 +3,23 @@ import YAML from 'yaml';
 // import { Column } from '../../../types';
 
 type hashObject = {
-  [key in string]: YamlModel['folders'][0];
+  [key in string]: YamlModel['marts'][0];
 };
 
-type Dataset = YamlModel['folders'][0]['datasets'][0];
+type Dataset = YamlModel['marts'][0]['datasets'][0];
 // type Column = Dataset['columns'][0];
 
-export const objectsToYaml = (data: YamlObjectArray) => {
+export const objectArrayToObjectModel = (data: YamlObjectArray) =>{
   const obj: hashObject = {};
 
   data.forEach((row) => {
-    obj[row.FolderName] = obj[row.FolderName] || {
-      name: row.FolderName,
-      description: row.FolderDescription,
+    obj[row.MartName] = obj[row.MartName] || {
+      name: row.MartName,
+      description: row.MartName === 'none' ? undefined : row.MartName,
       datasets: [],
     };
 
-    let currentDataset = obj[row.FolderName].datasets.find(
+    let currentDataset = obj[row.MartName].datasets.find(
       (dataset: Dataset) => dataset.id === row.DatasetID
     );
 
@@ -27,10 +27,10 @@ export const objectsToYaml = (data: YamlObjectArray) => {
       currentDataset = {
         name: row.DatasetName,
         id: row.DatasetID,
-        description: row.DatasetDescription,
+        description: row.DatasetDescription === 'none' ? undefined :  row.DatasetDescription,
         columns: [],
       };
-      obj[row.FolderName].datasets.push(currentDataset);
+      obj[row.MartName].datasets.push(currentDataset);
     }
 
     let currentColumn = currentDataset.columns.find(
@@ -40,13 +40,20 @@ export const objectsToYaml = (data: YamlObjectArray) => {
     if (!currentColumn) {
       currentColumn = {
         name: row.ColumnName,
-        description: row.ColumnDescription,
+        description: row.ColumnDescription === 'none' ? undefined : row.ColumnDescription,
         tests: [],
-      };
+      }; 
       currentDataset.columns.push(currentColumn);
     }
-    currentColumn.tests.push({ name: row.TestName, data: row.TestData });
+
+    let currentTest = {name: row.TestName, parameter: row.TestParameter === 'none'? undefined : row.TestParameter }
+    currentColumn.tests.push(currentTest);
   });
 
-  return YAML.stringify({ folders: [...Object.values(obj)] });
+  return { marts: [...Object.values(obj)] };
+
+}
+
+export const objectModelToYamlString = (data: YamlModel) => {
+ return YAML.stringify(data)
 };
