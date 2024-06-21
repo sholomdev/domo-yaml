@@ -123,7 +123,8 @@ export const YAMLEditor = function ({ code, setCode, highlighted,  }: Props) {
       codeEditorRef.current.view.dispatch({
         effects: [updateHighlightedStateEffect.of(highlighted)],
         sequential: true,
-        scrollIntoView: true
+        scrollIntoView: true,
+        selection: {anchor: highlighted.from}
       });
     }
   }, [highlighted]);
