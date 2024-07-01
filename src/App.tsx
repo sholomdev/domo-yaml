@@ -96,16 +96,14 @@ const expandNode = (node: TreeNode, _expandedKeys: TreeExpandedKeysType) => {
   }, [selectedKey])
 
   return (
-<div className="flex flex-row justify-content-center ">
-  <div className="flex flex-column gap-3">
- 
-  </div>
+<div className="flex flex-row ">
+  
 
-      {yamlQuery.isSuccess && <Tree className='w-4 p-2' filter filterMode="lenient" filterPlaceholder="Filter" value={treeNodes} onToggle={(e) => setExpandedKeys(e.value)} expandedKeys={expandedKeys}  selectionMode="single" selectionKeys={selectedKey} 
+      {yamlQuery.isSuccess && <Tree className='w-4 p-2 h-screen fixed top-0 overflow-scroll' filter filterMode="lenient" filterPlaceholder="Filter" value={treeNodes} onToggle={(e) => setExpandedKeys(e.value)} expandedKeys={expandedKeys}  selectionMode="single" selectionKeys={selectedKey} 
     onSelectionChange={(e) => {
       typeof e.value === 'string' && setSelectedKey(e.value);     
       }}/>}
-     <div className='w-full'>  <YAMLEditor code={code} setCode={setCode} highlighted={highlighted}/>
+     <div className='w-8 absolute right-0'>  <YAMLEditor code={code} setCode={setCode} highlighted={highlighted}/>
      </div>
     
       </div>

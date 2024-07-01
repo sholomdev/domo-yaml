@@ -157,7 +157,7 @@ export const YAMLEditor = function ({ code, setCode, highlighted,  }: Props) {
         ></YamlControls>
       </div>
       <CodeMirror
-        className="h-full overflow-y-hidden"
+        className="h-full overflow-y-hidden mt-6"
         ref={codeEditorRef}
         value={code}
         onChange={onChange}

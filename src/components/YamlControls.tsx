@@ -21,7 +21,7 @@ const YamlControls = ({
   isSaving,
 }: Props) => {
   return (
-    <div className="card flex flex-wrap justify-content-center gap-2">
+    <div className="align-items-start z-1 w-8 p-2 top-0 border-noround fixed card flex flex-wrap justify-content-center gap-2">
       <Button 
        severity="secondary"
         icon="pi pi-undo"
